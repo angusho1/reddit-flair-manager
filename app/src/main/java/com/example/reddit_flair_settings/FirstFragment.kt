@@ -52,7 +52,7 @@ class FirstFragment : Fragment() {
         val redirectUri = "$appScheme://$appHost"
         val state = "RANDOM"
         val responseType = "code"
-        val scopeStr = "identity flair"
+        val scopeStr = "identity flair mysubreddits"
         val baseUrl = "https://www.reddit.com/api/v1/authorize.compact"
         val authUrl = "$baseUrl?client_id=$clientId&response_type=$responseType&state=$state&redirect_uri=$redirectUri&scope=$scopeStr&duration=permanent"
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(authUrl))

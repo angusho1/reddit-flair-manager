@@ -8,18 +8,28 @@ import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.AuthFailureError
-import com.android.volley.Request
-import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
+import com.example.reddit_flair_settings.models.UserSubreddit
+import com.example.reddit_flair_settings.network.RedditAPIService
+import com.example.reddit_flair_settings.network.RequestHandler
+import kotlinx.android.synthetic.main.activity_flair_settings.*
 import org.json.JSONObject
 
 class FlairSettingsActivity : AppCompatActivity() {
+    private lateinit var requestHandler: RequestHandler
+    private lateinit var subredditListAdapter: SubredditListAdapter
+    lateinit var redditAPI: RedditAPIService
+    lateinit var subreddits: MutableList<UserSubreddit>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_flair_settings)
+
+        requestHandler = RequestHandler.getInstance(applicationContext)
+        redditAPI = RedditAPIService(applicationContext)
 
         val action: String? = intent?.action
 
@@ -30,6 +40,24 @@ class FlairSettingsActivity : AppCompatActivity() {
         }
     }
 
+    fun initAdapter(subredditItems: MutableList<UserSubreddit>) {
+        subredditListAdapter = SubredditListAdapter(subredditItems)
+
+        rvSubredditItems.adapter = subredditListAdapter
+        rvSubredditItems.layoutManager = LinearLayoutManager(this)
+    }
+
+    fun displaySubreddits() {
+        this.redditAPI.getUserSubreddits(
+            { response ->
+                initAdapter(response)
+            },
+            { error ->
+                Log.d("error", error.localizedMessage)
+            }
+        )
+    }
+
     private fun handleAuthCodeFlow(uri: Uri) {
         if (uri.getQueryParameter("error") != null) {
             // TODO: handle error
@@ -38,7 +66,6 @@ class FlairSettingsActivity : AppCompatActivity() {
         // TODO: Check state
 
         val authCode = uri.getQueryParameter("code")
-        val queue = Volley.newRequestQueue(this)
         val tokenUrl = "https://www.reddit.com/api/v1/access_token"
 
         val appScheme = resources.getString(R.string.app_scheme)
@@ -50,7 +77,8 @@ class FlairSettingsActivity : AppCompatActivity() {
         postData["code"] = authCode as String
         postData["redirect_uri"] = redirectUri
 
-        val tokenRequest = object: StringRequest(Request.Method.POST, tokenUrl,
+        val tokenRequest = object: StringRequest(
+            Method.POST, tokenUrl,
             { response ->
                 val data = JSONObject(response)
                 val accessToken = data.get("access_token")
@@ -61,6 +89,8 @@ class FlairSettingsActivity : AppCompatActivity() {
                 editor.putString("accessToken", accessToken as String)
                 editor.putString("refreshToken", refreshToken as String)
                 editor.apply()
+
+                displaySubreddits()
             },
             { error ->
                 Log.d("error", error.localizedMessage)
@@ -86,7 +116,7 @@ class FlairSettingsActivity : AppCompatActivity() {
             }
         }
 
-        queue.add(tokenRequest)
+        requestHandler.addToRequestQueue(tokenRequest)
     }
 
     private fun encodeBasicAuth(clientId: String, clientSecret: String): String {
@@ -103,37 +133,6 @@ class FlairSettingsActivity : AppCompatActivity() {
         val editor = sp.edit()
         editor.putString("accessToken", fragmentParams["access_token"].toString())
         editor.apply()
-    }
-
-    fun sendRequest(view: View) {
-        val textView = findViewById<TextView>(R.id.textView)
-
-        val queue = Volley.newRequestQueue(this)
-        val baseUrl = "https://oauth.reddit.com"
-        val url = "$baseUrl/api/v1/me"
-
-        val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs", MODE_PRIVATE)
-        var accessToken = sp.getString("accessToken", "").toString()
-
-        // Request a string response from the provided URL.
-        val jsonObjectRequest = object: JsonObjectRequest(Request.Method.GET, url, null,
-            { response ->
-                textView.text = response.toString()
-            },
-            { error ->
-                Log.d("error", error.localizedMessage)
-            }
-        ) {
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers.put("Authorization", "Bearer $accessToken")
-                return headers
-            }
-        }
-
-        // Add the request to the RequestQueue.
-        queue.add(jsonObjectRequest)
     }
 
     private fun isAuthRedirect() : Boolean {

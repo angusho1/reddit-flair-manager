@@ -9,6 +9,7 @@
         <entry key="app/src/main/res/layout/content_main.xml" value="0.47708333333333336" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.335" />
         <entry key="app/src/main/res/layout/fragment_second.xml" value="0.55" />
+        <entry key="app/src/main/res/layout/subreddit_item.xml" value="0.335" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_reddit.xml" value="0.13645833333333332" />
       </map>
     </option>
