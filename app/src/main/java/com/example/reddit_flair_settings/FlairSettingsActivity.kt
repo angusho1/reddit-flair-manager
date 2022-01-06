@@ -6,12 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
-import android.view.View
-import android.widget.TextView
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.android.volley.AuthFailureError
 import com.android.volley.toolbox.StringRequest
+import com.example.reddit_flair_settings.adapters.SubredditListAdapter
 import com.example.reddit_flair_settings.models.UserSubreddit
 import com.example.reddit_flair_settings.network.RedditAPIService
 import com.example.reddit_flair_settings.network.RequestHandler
