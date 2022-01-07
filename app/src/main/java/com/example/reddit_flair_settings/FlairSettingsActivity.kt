@@ -1,51 +1,64 @@
 package com.example.reddit_flair_settings
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Base64
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.android.volley.AuthFailureError
-import com.android.volley.toolbox.StringRequest
 import com.example.reddit_flair_settings.adapters.SubredditListAdapter
 import com.example.reddit_flair_settings.models.UserSubreddit
 import com.example.reddit_flair_settings.network.RedditAPIService
-import com.example.reddit_flair_settings.network.RequestHandler
 import kotlinx.android.synthetic.main.activity_flair_settings.*
-import org.json.JSONObject
 
 class FlairSettingsActivity : AppCompatActivity() {
-    private lateinit var requestHandler: RequestHandler
     private lateinit var subredditListAdapter: SubredditListAdapter
     lateinit var redditAPI: RedditAPIService
-    lateinit var subreddits: MutableList<UserSubreddit>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_flair_settings)
 
-        requestHandler = RequestHandler.getInstance(applicationContext)
         redditAPI = RedditAPIService(applicationContext)
 
-        val action: String? = intent?.action
+//        val action: String? = intent?.action
 
         if (isAuthRedirect()) {
             val url: Uri = intent.data as Uri
             handleAuthCodeFlow(url)
 //            handleImplicitFlow(url)
+        } else {
+            displaySubreddits()
         }
     }
 
-    fun initAdapter(subredditItems: MutableList<UserSubreddit>) {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_sign_out -> {
+                redditAPI.signOut()
+                startActivity(Intent(this, LoginActivity::class.java))
+                return true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun initAdapter(subredditItems: MutableList<UserSubreddit>) {
         subredditListAdapter = SubredditListAdapter(subredditItems)
 
         rvSubredditItems.adapter = subredditListAdapter
         rvSubredditItems.layoutManager = LinearLayoutManager(this)
     }
 
-    fun displaySubreddits() {
+    private fun displaySubreddits() {
         this.redditAPI.getUserSubreddits(
             { response ->
                 initAdapter(response)
@@ -57,70 +70,15 @@ class FlairSettingsActivity : AppCompatActivity() {
     }
 
     private fun handleAuthCodeFlow(uri: Uri) {
-        if (uri.getQueryParameter("error") != null) {
-            // TODO: handle error
-            return
-        }
-        // TODO: Check state
-
-        val authCode = uri.getQueryParameter("code")
-        val tokenUrl = "https://www.reddit.com/api/v1/access_token"
-
-        val appScheme = resources.getString(R.string.app_scheme)
-        val appHost = resources.getString(R.string.app_host)
-        val redirectUri = "$appScheme://$appHost"
-
-        val postData: MutableMap<String, String> = HashMap()
-        postData["grant_type"] = "authorization_code"
-        postData["code"] = authCode as String
-        postData["redirect_uri"] = redirectUri
-
-        val tokenRequest = object: StringRequest(
-            Method.POST, tokenUrl,
-            { response ->
-                val data = JSONObject(response)
-                val accessToken = data.get("access_token")
-                val refreshToken = data.get("refresh_token")
-
-                val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs", MODE_PRIVATE)
-                val editor = sp.edit()
-                editor.putString("accessToken", accessToken as String)
-                editor.putString("refreshToken", refreshToken as String)
-                editor.apply()
-
+        redditAPI.retrieveAccessToken(
+            uri,
+            {
                 displaySubreddits()
             },
             { error ->
                 Log.d("error", error.localizedMessage)
             }
-        ) {
-            override fun getBodyContentType(): String {
-                return "application/x-www-form-urlencoded; charset=UTF-8"
-            }
-
-            @Throws(AuthFailureError::class)
-            override fun getParams(): Map<String, String> {
-                return postData
-            }
-
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                val clientId = resources.getString(R.string.reddit_app_id)
-                val secret = resources.getString(R.string.reddit_app_secret)
-                val encoding = encodeBasicAuth(clientId, secret)
-                headers.put("Authorization", "Basic $encoding")
-                return headers
-            }
-        }
-
-        requestHandler.addToRequestQueue(tokenRequest)
-    }
-
-    private fun encodeBasicAuth(clientId: String, clientSecret: String): String {
-        var str = "$clientId:$clientSecret"
-        var dataToEncode: ByteArray = str.toByteArray(Charsets.UTF_8)
-        return Base64.encodeToString(dataToEncode, Base64.NO_WRAP)
+        )
     }
 
     private fun handleImplicitFlow(uri: Uri) {
