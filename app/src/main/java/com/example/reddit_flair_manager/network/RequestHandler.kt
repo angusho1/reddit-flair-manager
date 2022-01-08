@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings.network
+package com.example.reddit_flair_manager.network
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -11,7 +11,7 @@ import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import com.example.reddit_flair_settings.R
+import com.example.reddit_flair_manager.R
 import org.json.JSONObject
 
 // Reference: https://developer.android.com/training/volley/requestqueue#singleton

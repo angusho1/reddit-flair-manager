@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings
+package com.example.reddit_flair_manager
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

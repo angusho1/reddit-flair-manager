@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings
+package com.example.reddit_flair_manager
 
 import android.content.Intent
 import android.content.SharedPreferences
@@ -9,9 +9,9 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.reddit_flair_settings.adapters.SubredditListAdapter
-import com.example.reddit_flair_settings.models.UserSubreddit
-import com.example.reddit_flair_settings.network.RedditAPIService
+import com.example.reddit_flair_manager.adapters.SubredditListAdapter
+import com.example.reddit_flair_manager.models.UserSubreddit
+import com.example.reddit_flair_manager.network.RedditAPIService
 import kotlinx.android.synthetic.main.activity_flair_settings.*
 
 class FlairSettingsActivity : AppCompatActivity() {

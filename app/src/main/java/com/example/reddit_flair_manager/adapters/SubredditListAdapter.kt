@@ -1,23 +1,14 @@
-package com.example.reddit_flair_settings.adapters
+package com.example.reddit_flair_manager.adapters
 
-import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.os.AsyncTask
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.reddit_flair_settings.R
-import com.example.reddit_flair_settings.models.UserSubreddit
-import com.example.reddit_flair_settings.utils.InternetImageLoader
+import com.example.reddit_flair_manager.R
+import com.example.reddit_flair_manager.models.UserSubreddit
+import com.example.reddit_flair_manager.utils.InternetImageLoader
 import kotlinx.android.synthetic.main.subreddit_item.view.*
-import java.lang.Exception
-import java.net.URL
 
 // Ref: https://github.com/philipplackner/TodoList/blob/master/app/src/main/java/com/example/todolist/TodoAdapter.kt#L20
 

@@ -1,13 +1,12 @@
-package com.example.reddit_flair_settings.adapters
+package com.example.reddit_flair_manager.adapters
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.reddit_flair_settings.R
-import com.example.reddit_flair_settings.models.*
-import com.example.reddit_flair_settings.utils.InternetImageLoader
+import com.example.reddit_flair_manager.R
+import com.example.reddit_flair_manager.models.*
+import com.example.reddit_flair_manager.utils.InternetImageLoader
 import kotlinx.android.synthetic.main.flair_image.view.*
 import kotlinx.android.synthetic.main.flair_text.view.*
 

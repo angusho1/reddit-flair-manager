@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings
+package com.example.reddit_flair_manager
 
 import org.junit.Test
 

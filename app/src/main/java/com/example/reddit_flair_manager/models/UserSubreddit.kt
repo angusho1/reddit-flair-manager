@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings.models
+package com.example.reddit_flair_manager.models
 
 import java.net.URL
 

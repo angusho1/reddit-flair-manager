@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings.network
+package com.example.reddit_flair_manager.network
 
 import android.content.Context
 import android.content.Intent
@@ -8,8 +8,8 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.Response
-import com.example.reddit_flair_settings.R
-import com.example.reddit_flair_settings.models.*
+import com.example.reddit_flair_manager.R
+import com.example.reddit_flair_manager.models.*
 import org.json.JSONObject
 import java.net.URL
 

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">reddit-flair-settings</string>
+    <string name="app_name">Reddit Flair Manager</string>
     <string name="action_settings">Sign Out</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
@@ -17,4 +17,5 @@
     <string name="preference_file_key">redditPrefs</string>
     <string name="revoke_token_url">https://www.reddit.com/api/v1/revoke_token</string>
     <string name="action_sign_out">Sign Out</string>
+    <string name="app_description">Manage flairs for all your Subreddits in one place</string>
 </resources>

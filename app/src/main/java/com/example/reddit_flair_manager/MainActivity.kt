@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings
+package com.example.reddit_flair_manager
 
 import android.content.Intent
 import android.content.SharedPreferences
@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
-import com.example.reddit_flair_settings.databinding.ActivityMainBinding
+import com.example.reddit_flair_manager.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 

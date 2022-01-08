@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings.models
+package com.example.reddit_flair_manager.models
 
 const val VIEW_TYPE_TEXT = 0
 const val VIEW_TYPE_IMAGE = 1

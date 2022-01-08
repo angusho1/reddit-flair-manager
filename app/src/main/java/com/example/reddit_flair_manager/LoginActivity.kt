@@ -1,8 +1,8 @@
-package com.example.reddit_flair_settings
+package com.example.reddit_flair_manager
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.example.reddit_flair_settings.network.RedditAPIService
+import com.example.reddit_flair_manager.network.RedditAPIService
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {

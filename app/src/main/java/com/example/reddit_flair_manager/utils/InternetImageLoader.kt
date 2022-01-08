@@ -1,4 +1,4 @@
-package com.example.reddit_flair_settings.utils
+package com.example.reddit_flair_manager.utils
 
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
