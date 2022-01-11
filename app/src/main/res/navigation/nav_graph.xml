@@ -7,8 +7,8 @@
 
     <fragment
         android:id="@+id/FirstFragment"
-        android:name="com.example.reddit_flair_manager.FirstFragment"
+        android:name="com.example.reddit_flair_manager.SubredditListFragment"
         android:label="@string/first_fragment_label"
-        tools:layout="@layout/fragment_first">
+        tools:layout="@layout/fragment_subreddit_list">
     </fragment>
 </navigation>

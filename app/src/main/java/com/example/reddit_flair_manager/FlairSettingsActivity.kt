@@ -1,38 +1,33 @@
 package com.example.reddit_flair_manager
 
 import android.content.Intent
-import android.content.SharedPreferences
-import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.reddit_flair_manager.adapters.SubredditListAdapter
-import com.example.reddit_flair_manager.models.UserSubreddit
+import androidx.navigation.findNavController
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import com.example.reddit_flair_manager.databinding.ActivityFlairSettingsBinding
 import com.example.reddit_flair_manager.network.RedditAPIService
-import kotlinx.android.synthetic.main.activity_flair_settings.*
 
 class FlairSettingsActivity : AppCompatActivity() {
-    private lateinit var subredditListAdapter: SubredditListAdapter
+    private lateinit var appBarConfiguration: AppBarConfiguration
+    private lateinit var binding: ActivityFlairSettingsBinding
     lateinit var redditAPI: RedditAPIService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_flair_settings)
+
+        binding = ActivityFlairSettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        val navController = findNavController(R.id.nav_host_fragment_content_main)
+        appBarConfiguration = AppBarConfiguration(navController.graph)
+
+        setupActionBarWithNavController(navController, appBarConfiguration)
 
         redditAPI = RedditAPIService(applicationContext)
-
-//        val action: String? = intent?.action
-
-        if (isAuthRedirect()) {
-            val url: Uri = intent.data as Uri
-            handleAuthCodeFlow(url)
-//            handleImplicitFlow(url)
-        } else {
-            displaySubreddits()
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -50,60 +45,4 @@ class FlairSettingsActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
-    private fun initAdapter(subredditItems: MutableList<UserSubreddit>) {
-        subredditListAdapter = SubredditListAdapter(subredditItems)
-
-        rvSubredditItems.adapter = subredditListAdapter
-        rvSubredditItems.layoutManager = LinearLayoutManager(this)
-    }
-
-    private fun displaySubreddits() {
-        this.redditAPI.getUserSubreddits(
-            { response ->
-                initAdapter(response)
-            },
-            { error ->
-                Log.d("error", error.localizedMessage)
-            }
-        )
-    }
-
-    private fun handleAuthCodeFlow(uri: Uri) {
-        redditAPI.retrieveAccessToken(
-            uri,
-            {
-                displaySubreddits()
-            },
-            { error ->
-                Log.d("error", error.localizedMessage)
-            }
-        )
-    }
-
-    private fun handleImplicitFlow(uri: Uri) {
-        val fragmentParams: MutableMap<String, String> = getFragmentParams(uri)
-        // TODO: Check state
-
-        val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs", MODE_PRIVATE)
-        val editor = sp.edit()
-        editor.putString("accessToken", fragmentParams["access_token"].toString())
-        editor.apply()
-    }
-
-    private fun isAuthRedirect() : Boolean {
-        return intent.data != null
-    }
-
-    private fun getFragmentParams(uri: Uri): MutableMap<String, String> {
-        val fragment: String = uri.fragment as String
-        val args: List<String> = fragment.split("&")
-        val fragmentParams: MutableMap<String, String> = hashMapOf()
-        for (arg: String in args) {
-            var pair: List<String> = arg.split("=")
-            fragmentParams[pair[0]] = pair[1]
-        }
-        return fragmentParams
-    }
-
 }
