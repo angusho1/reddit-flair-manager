@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.reddit_flair_manager.adapters.SubredditListAdapter
 import com.example.reddit_flair_manager.databinding.FragmentSubredditListBinding
@@ -26,14 +28,18 @@ class SubredditListFragment : Fragment() {
     private val binding get() = _binding!!
     lateinit var redditAPI: RedditAPIService
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        redditAPI = RedditAPIService(requireActivity().applicationContext)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        redditAPI = RedditAPIService(requireActivity().applicationContext)
-
         _binding = FragmentSubredditListBinding.inflate(inflater, container, false)
+
         if (isAuthRedirect()) {
             val url: Uri = requireActivity().intent.data as Uri
             handleAuthCodeFlow(url)
@@ -55,8 +61,15 @@ class SubredditListFragment : Fragment() {
         _binding = null
     }
 
+    fun navigateToFlairOptions(subreddit: UserSubreddit) {
+        if (subreddit.flairsEnabled) {
+            val bundle = bundleOf("subredditName" to subreddit.name)
+            findNavController().navigate(R.id.action_SubbredditList_to_FlairList, bundle)
+        }
+    }
+
     private fun initAdapter(subredditItems: MutableList<UserSubreddit>) {
-        subredditListAdapter = SubredditListAdapter(subredditItems)
+        subredditListAdapter = SubredditListAdapter(subredditItems, ::navigateToFlairOptions)
 
         rvSubredditItems.adapter = subredditListAdapter
         rvSubredditItems.layoutManager = LinearLayoutManager(requireActivity())

@@ -49,7 +49,7 @@ class FlairAdapter(
         val component: FlairRichTextComponent = if (flair.richText != null) {
             flair.richText[position]
         } else {
-            TextComponent("")
+            TextComponent(flair.text!!)
         }
 
         when (holder.itemViewType) {

@@ -4,15 +4,19 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout-w936dp/content_scrolling.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_flair_manager.xml" value="0.375" />
         <entry key="app/src/main/res/layout/activity_flair_settings.xml" value="0.335" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.45" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.41335740072202165" />
-        <entry key="app/src/main/res/layout/content_main.xml" value="0.47708333333333336" />
+        <entry key="app/src/main/res/layout/content_main.xml" value="0.42718446601941745" />
         <entry key="app/src/main/res/layout/flair.xml" value="0.23854166666666668" />
         <entry key="app/src/main/res/layout/flair_image.xml" value="0.45" />
+        <entry key="app/src/main/res/layout/flair_option.xml" value="0.45" />
         <entry key="app/src/main/res/layout/flair_text.xml" value="0.55" />
         <entry key="app/src/main/res/layout/fragment_first.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/fragment_flair_list.xml" value="0.23866597186034394" />
         <entry key="app/src/main/res/layout/fragment_second.xml" value="0.55" />
+        <entry key="app/src/main/res/layout/fragment_subreddit_list.xml" value="0.375" />
         <entry key="app/src/main/res/layout/rounded_fill.xml" value="0.23854166666666668" />
         <entry key="app/src/main/res/layout/subreddit_item.xml" value="0.45" />
         <entry key="app/src/main/res/menu/menu_main.xml" value="0.6116504854368932" />

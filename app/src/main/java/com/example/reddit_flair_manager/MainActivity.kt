@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         launchIntent = if (refreshToken == null) {
             Intent(this, LoginActivity::class.java)
         } else {
-            Intent(this, FlairSettingsActivity::class.java)
+            Intent(this, FlairManagerActivity::class.java)
         }
         startActivity(launchIntent)
         finish()

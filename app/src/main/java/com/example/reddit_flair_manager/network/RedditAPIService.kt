@@ -12,6 +12,10 @@ import com.example.reddit_flair_manager.R
 import com.example.reddit_flair_manager.models.*
 import org.json.JSONObject
 import java.net.URL
+import org.json.JSONArray
+import java.math.BigInteger
+import java.nio.charset.StandardCharsets
+
 
 class RedditAPIService constructor(context: Context) {
     private val applicationContext: Context = context
@@ -20,6 +24,7 @@ class RedditAPIService constructor(context: Context) {
     private val appScheme = applicationContext.getString(R.string.app_scheme)
     private val appHost = applicationContext.getString(R.string.app_host)
     private val clientId = applicationContext.getString(R.string.reddit_app_id)
+    private val prefFileKey = applicationContext.resources.getString(R.string.preference_file_key)
     private lateinit var appState: String
 
     fun getOAuthSignInIntent(): Intent {
@@ -65,7 +70,6 @@ class RedditAPIService constructor(context: Context) {
                 val refreshToken = data.get("refresh_token")
                 val expiresIn = (data.get("expires_in") as Int).toLong()
 
-                val prefFileKey = applicationContext.resources.getString(R.string.preference_file_key)
                 val sp: SharedPreferences = applicationContext.getSharedPreferences(prefFileKey, AppCompatActivity.MODE_PRIVATE)
                 val editor = sp.edit()
                 editor.putString("accessToken", accessToken as String)
@@ -83,7 +87,6 @@ class RedditAPIService constructor(context: Context) {
     }
 
     fun signOut() {
-        val prefFileKey = applicationContext.resources.getString(R.string.preference_file_key)
         val sp: SharedPreferences = applicationContext.getSharedPreferences(prefFileKey, AppCompatActivity.MODE_PRIVATE)
 
         val refreshToken = sp.getString("refreshToken", null)
@@ -93,13 +96,17 @@ class RedditAPIService constructor(context: Context) {
         }
     }
 
-    fun getUserIdentity(listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener) {
+    fun getUserIdentity(cb: (x: RedditUser) -> Unit, errorListener: Response.ErrorListener) {
         val url = "$baseUrl/api/v1/me"
 
         val sendRequest = {
-            requestHandler.sendAuthorizedRequest(applicationContext, Request.Method.GET, url, null,
-                { response ->
-                    listener.onResponse(response)
+            requestHandler.sendAuthorizedRequest(applicationContext, Request.Method.GET, url, hashMapOf(),
+                { response: JSONObject ->
+                    val user = RedditUser(
+                        response.getString("name"),
+                        response.getString("snoovatar_img")
+                    )
+                    cb(user)
                 }, errorListener)
         }
 
@@ -110,33 +117,21 @@ class RedditAPIService constructor(context: Context) {
         val url = "$baseUrl/subreddits/mine/subscriber"
 
         val sendRequest = {
-            requestHandler.sendAuthorizedRequest(applicationContext, Request.Method.GET, url, null,
-                { response ->
+            requestHandler.sendAuthorizedRequest(applicationContext, Request.Method.GET, url, hashMapOf(),
+                { response: JSONObject ->
                     val subreddits = response.getJSONObject("data").getJSONArray("children")
                     val res: MutableList<UserSubreddit> = mutableListOf()
 
                     for (i in 0 until subreddits.length()) {
                         val subData = subreddits.getJSONObject(i).getJSONObject("data")
-                        var richText: MutableList<FlairRichTextComponent>?
+                        var richText: List<FlairRichTextComponent>?
 
                         val richTextComponents = subData.getJSONArray("user_flair_richtext")
 
                         val flairType: String = subData.getString("user_flair_type")
 
                         if (flairType == "richtext") {
-                            richText = mutableListOf()
-                            for (j in 0 until richTextComponents.length()) {
-                                val component = richTextComponents.getJSONObject(j)
-                                val type = component.getString("e")
-                                if (type == "text") {
-                                    val text = component.getString("t")
-                                    richText.add(TextComponent(text))
-                                } else if (type == "emoji") {
-                                    val id = component.getString("a")
-                                    val url = component.getString("u")
-                                    richText.add(IconComponent(id, url))
-                                }
-                            }
+                            richText = parseRichText(richTextComponents)
                         } else {
                             richText = null
                         }
@@ -145,7 +140,8 @@ class RedditAPIService constructor(context: Context) {
                             subData.getString("user_flair_background_color"),
                             subData.getString("user_flair_text_color"),
                             flairType,
-                            richText
+                            richText,
+                            subData.getString("user_flair_text")
                         )
 
                         val iconImg = subData.getString("icon_img")
@@ -174,8 +170,85 @@ class RedditAPIService constructor(context: Context) {
         ensureAccessToken(sendRequest)
     }
 
+    fun getSubredditFlairs(subredditName: String, cb: (x: MutableList<UserFlair>) -> Unit, errorListener: Response.ErrorListener) {
+        val url = "$baseUrl/$subredditName/api/user_flair_v2"
+
+        val sendRequest = {
+            requestHandler.sendAuthorizedRequest(
+                applicationContext,
+                Request.Method.GET,
+                url,
+                hashMapOf(),
+                { flairs: JSONArray ->
+                    val res: MutableList<UserFlair> = mutableListOf()
+
+                    for (i in 0 until flairs.length()) {
+                        val currFlairData = flairs.getJSONObject(i)
+                        val flairType = currFlairData.getString("type")
+                        val richText = if (flairType == "richtext") parseRichText(currFlairData.getJSONArray("richtext")) else null
+                        res.add(UserFlair(
+                            currFlairData.getString("background_color"),
+                            currFlairData.getString("text_color"),
+                            flairType,
+                            richText,
+                            currFlairData.getString("text"),
+                            currFlairData.getString("id")
+                        ))
+                    }
+
+                    cb(res)
+                },
+                errorListener
+            )
+        }
+
+        ensureAccessToken(sendRequest)
+    }
+
+    fun updateUserFlair(subreddit: UserSubreddit, flair: UserFlair, cb: () -> Unit, errorListener: Response.ErrorListener) {
+        val url = "$baseUrl/${subreddit.name}/api/selectflair"
+
+        val sp: SharedPreferences = applicationContext.getSharedPreferences(prefFileKey, AppCompatActivity.MODE_PRIVATE)
+        val username = sp.getString("username", null) ?: return // TODO: throw an error if username is null
+
+        val postData: MutableMap<String, String> = HashMap()
+        postData["name"] = username
+        postData["flair_template_id"] = flair.templateId!!
+
+        val sendRequest = {
+            requestHandler.sendAuthorizedRequest(
+                applicationContext,
+                Request.Method.POST,
+                url,
+                postData,
+                { response: JSONObject ->
+                    cb()
+                },
+                errorListener
+            )
+        }
+
+        ensureAccessToken(sendRequest)
+    }
+
+    private fun parseRichText(rtArray: JSONArray): List<FlairRichTextComponent> {
+        val richText = mutableListOf<FlairRichTextComponent>()
+        for (j in 0 until rtArray.length()) {
+            val component = rtArray.getJSONObject(j)
+            val type = component.getString("e")
+            if (type == "text") {
+                val text = component.getString("t")
+                richText.add(TextComponent(text))
+            } else if (type == "emoji") {
+                val id = component.getString("a")
+                val url = component.getString("u")
+                richText.add(IconComponent(id, url))
+            }
+        }
+        return richText
+    }
+
     private fun ensureAccessToken(cb: () -> Unit) {
-        val prefFileKey = applicationContext.resources.getString(R.string.preference_file_key)
         val sp: SharedPreferences = applicationContext.getSharedPreferences(prefFileKey, AppCompatActivity.MODE_PRIVATE)
 
         val currTime = System.currentTimeMillis() / 1000
@@ -233,7 +306,6 @@ class RedditAPIService constructor(context: Context) {
             postData,
             { response ->
                 Log.d("Success", "$type revoked")
-                val prefFileKey = applicationContext.resources.getString(R.string.preference_file_key)
                 val sp: SharedPreferences = applicationContext.getSharedPreferences(prefFileKey, AppCompatActivity.MODE_PRIVATE)
                 val editor = sp.edit()
 
@@ -246,6 +318,7 @@ class RedditAPIService constructor(context: Context) {
                     editor.remove("refreshToken")
                     editor.remove("accessToken")
                     editor.remove("accessTokenExpiryTime")
+                    editor.remove("username")
                 }
                 editor.apply()
             },

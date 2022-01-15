@@ -8,10 +8,12 @@ import com.android.volley.AuthFailureError
 import com.android.volley.Request
 import com.android.volley.RequestQueue
 import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.example.reddit_flair_manager.R
+import org.json.JSONArray
 import org.json.JSONObject
 
 // Reference: https://developer.android.com/training/volley/requestqueue#singleton
@@ -38,7 +40,7 @@ class RequestHandler constructor(context: Context) {
         requestQueue.add(req)
     }
 
-    fun sendAuthorizedRequest(applicationContext: Context, method: Int, url: String, jsonRequest: JSONObject?, listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener) {
+    fun sendAuthorizedRequest(applicationContext: Context, method: Int, url: String, postData: MutableMap<String, String>, listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener) {
         val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs",
             AppCompatActivity.MODE_PRIVATE
         )
@@ -47,10 +49,19 @@ class RequestHandler constructor(context: Context) {
         val jsonObjectRequest = object: JsonObjectRequest(
             method,
             url,
-            jsonRequest,
+            null,
             listener,
             errorListener
         ) {
+            override fun getBodyContentType(): String {
+                return "application/x-www-form-urlencoded; charset=UTF-8"
+            }
+
+            @Throws(AuthFailureError::class)
+            override fun getParams(): Map<String, String> {
+                return postData
+            }
+
             @Throws(AuthFailureError::class)
             override fun getHeaders(): Map<String, String> {
                 val headers = HashMap<String, String>()
@@ -60,6 +71,40 @@ class RequestHandler constructor(context: Context) {
         }
 
         addToRequestQueue(jsonObjectRequest)
+    }
+
+    @JvmName("sendAuthorizedRequest1")
+    fun sendAuthorizedRequest(applicationContext: Context, method: Int, url: String, postData: MutableMap<String, String>, listener: Response.Listener<JSONArray>, errorListener: Response.ErrorListener) {
+        val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs",
+            AppCompatActivity.MODE_PRIVATE
+        )
+        val accessToken = sp.getString("accessToken", "").toString()
+
+        val jsonArrayRequest = object: JsonArrayRequest(
+            method,
+            url,
+            null,
+            listener,
+            errorListener
+        ) {
+            override fun getBodyContentType(): String {
+                return "application/x-www-form-urlencoded; charset=UTF-8"
+            }
+
+            @Throws(AuthFailureError::class)
+            override fun getParams(): Map<String, String> {
+                return postData
+            }
+
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Authorization", "Bearer $accessToken")
+                return headers
+            }
+        }
+
+        addToRequestQueue(jsonArrayRequest)
     }
 
     fun sendBasicAuthRequest(applicationContext: Context, method: Int, url: String, postData: MutableMap<String, String>, listener: Response.Listener<String>,errorListener: Response.ErrorListener) {

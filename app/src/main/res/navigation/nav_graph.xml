@@ -3,12 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/FirstFragment">
+    app:startDestination="@id/SubredditList">
 
     <fragment
-        android:id="@+id/FirstFragment"
+        android:id="@+id/SubredditList"
         android:name="com.example.reddit_flair_manager.SubredditListFragment"
-        android:label="@string/first_fragment_label"
+        android:label="@string/subreddit_list_label"
         tools:layout="@layout/fragment_subreddit_list">
+
+        <action
+            android:id="@+id/action_SubbredditList_to_FlairList"
+            app:destination="@id/FlairList" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/FlairList"
+        android:name="com.example.reddit_flair_manager.FlairListFragment"
+        android:label="@string/subreddit_list_label"
+        tools:layout="@layout/fragment_subreddit_list">
+
+        <action
+            android:id="@+id/action_FlairList_to_SubbredditList"
+            app:destination="@id/SubredditList" />
+        <argument
+            android:name="subredditName"
+            app:argType="string" />
     </fragment>
 </navigation>

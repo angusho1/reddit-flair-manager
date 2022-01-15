@@ -9,13 +9,15 @@ import com.example.reddit_flair_manager.R
 import com.example.reddit_flair_manager.models.UserSubreddit
 import com.example.reddit_flair_manager.utils.InternetImageLoader
 import kotlinx.android.synthetic.main.subreddit_item.view.*
+import kotlin.reflect.KFunction1
 
 // Ref: https://github.com/philipplackner/TodoList/blob/master/app/src/main/java/com/example/todolist/TodoAdapter.kt#L20
 
 // Ref: https://www.geeksforgeeks.org/how-to-create-a-nested-recyclerview-in-android/
 
 class SubredditListAdapter(
-    private val subreddits: MutableList<UserSubreddit>
+    private val subreddits: MutableList<UserSubreddit>,
+    private val onClickListener: KFunction1<UserSubreddit, Unit>
 ): RecyclerView.Adapter<SubredditListAdapter.SubredditViewHolder>() {
     private val viewPool = RecyclerView.RecycledViewPool()
 
@@ -39,6 +41,9 @@ class SubredditListAdapter(
 
         holder.itemView.apply {
             rv_flair.setBackgroundColor(flair.backgroundColor)
+            holder.itemView.setOnClickListener { view: View ->
+                onClickListener(currSubreddit)
+            }
             subredditName.text = currSubreddit.name
 
             if (currSubreddit.iconUrl != null) {

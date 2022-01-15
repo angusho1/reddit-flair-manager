@@ -9,7 +9,9 @@ class UserFlair(
     backgroundColor: String,
     textColor: String,
     type: String,
-    val richText: List<FlairRichTextComponent>?
+    val richText: List<FlairRichTextComponent>?,
+    val text: String? = "",
+    val templateId: String? = null
 ) {
     val backgroundColor: Int // user_flair_background_color
     val textColor: Int // user_flair_text_color

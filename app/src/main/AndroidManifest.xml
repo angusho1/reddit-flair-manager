@@ -15,8 +15,10 @@
             android:name=".LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".FlairSettingsActivity"
-            android:exported="true">
+            android:name=".FlairManagerActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Redditflairsettings.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
