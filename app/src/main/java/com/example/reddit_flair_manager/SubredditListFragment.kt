@@ -39,6 +39,7 @@ class SubredditListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentSubredditListBinding.inflate(inflater, container, false)
+        binding.indeterminateBar.visibility = View.VISIBLE
 
         if (isAuthRedirect()) {
             val url: Uri = requireActivity().intent.data as Uri
@@ -79,6 +80,7 @@ class SubredditListFragment : Fragment() {
         this.redditAPI.getUserSubreddits(
             { response ->
                 initAdapter(response)
+                binding.indeterminateBar.visibility = View.GONE
             },
             { error ->
                 Log.d("error", error.localizedMessage)

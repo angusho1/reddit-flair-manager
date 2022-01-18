@@ -3,18 +3,23 @@ package com.example.reddit_flair_manager.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.reddit_flair_manager.R
 import com.example.reddit_flair_manager.models.UserFlair
 import com.example.reddit_flair_manager.models.UserSubreddit
 import com.example.reddit_flair_manager.utils.InternetImageLoader
+import kotlinx.android.synthetic.main.flair_option.view.*
 import kotlinx.android.synthetic.main.subreddit_item.view.*
+import kotlinx.android.synthetic.main.subreddit_item.view.rv_flair
 
 class FlairListAdapter(
-    private val flairOptions: MutableList<UserFlair>
+    val flairOptions: MutableList<UserFlair>
 ): RecyclerView.Adapter<FlairListAdapter.FlairOptionViewHolder>() {
     private val viewPool = RecyclerView.RecycledViewPool()
+    var checkedPosition = -1
+    private var lastCheckedButton: RadioButton? = null
 
     class FlairOptionViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
         val childRecyclerView: RecyclerView = itemView.findViewById(R.id.rv_flair)
@@ -35,6 +40,17 @@ class FlairListAdapter(
 
         holder.itemView.apply {
             rv_flair.setBackgroundColor(currFlairOption.backgroundColor)
+            radioButton.isChecked = position == checkedPosition
+
+            holder.itemView.setOnClickListener(View.OnClickListener { v ->
+                val clickedPos = holder.adapterPosition
+                if (lastCheckedButton != null) {
+                    lastCheckedButton!!.isChecked = false
+                }
+                lastCheckedButton = radioButton
+                checkedPosition = clickedPos
+                radioButton.isChecked = true
+            })
         }
 
         val layoutManager = LinearLayoutManager(

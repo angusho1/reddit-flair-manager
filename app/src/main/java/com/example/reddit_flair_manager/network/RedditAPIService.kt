@@ -100,7 +100,7 @@ class RedditAPIService constructor(context: Context) {
         val url = "$baseUrl/api/v1/me"
 
         val sendRequest = {
-            requestHandler.sendAuthorizedRequest(applicationContext, Request.Method.GET, url, hashMapOf(),
+            requestHandler.sendAuthorizedGetRequest(applicationContext, url,
                 { response: JSONObject ->
                     val user = RedditUser(
                         response.getString("name"),
@@ -117,7 +117,7 @@ class RedditAPIService constructor(context: Context) {
         val url = "$baseUrl/subreddits/mine/subscriber"
 
         val sendRequest = {
-            requestHandler.sendAuthorizedRequest(applicationContext, Request.Method.GET, url, hashMapOf(),
+            requestHandler.sendAuthorizedGetRequest(applicationContext, url,
                 { response: JSONObject ->
                     val subreddits = response.getJSONObject("data").getJSONArray("children")
                     val res: MutableList<UserSubreddit> = mutableListOf()
@@ -174,11 +174,9 @@ class RedditAPIService constructor(context: Context) {
         val url = "$baseUrl/$subredditName/api/user_flair_v2"
 
         val sendRequest = {
-            requestHandler.sendAuthorizedRequest(
+            requestHandler.sendAuthorizedGetRequest(
                 applicationContext,
-                Request.Method.GET,
                 url,
-                hashMapOf(),
                 { flairs: JSONArray ->
                     val res: MutableList<UserFlair> = mutableListOf()
 
@@ -205,8 +203,8 @@ class RedditAPIService constructor(context: Context) {
         ensureAccessToken(sendRequest)
     }
 
-    fun updateUserFlair(subreddit: UserSubreddit, flair: UserFlair, cb: () -> Unit, errorListener: Response.ErrorListener) {
-        val url = "$baseUrl/${subreddit.name}/api/selectflair"
+    fun updateUserFlair(subredditName: String, flair: UserFlair, cb: () -> Unit, errorListener: Response.ErrorListener) {
+        val url = "$baseUrl/$subredditName/api/selectflair"
 
         val sp: SharedPreferences = applicationContext.getSharedPreferences(prefFileKey, AppCompatActivity.MODE_PRIVATE)
         val username = sp.getString("username", null) ?: return // TODO: throw an error if username is null
@@ -216,9 +214,8 @@ class RedditAPIService constructor(context: Context) {
         postData["flair_template_id"] = flair.templateId!!
 
         val sendRequest = {
-            requestHandler.sendAuthorizedRequest(
+            requestHandler.sendAuthorizedPostRequest(
                 applicationContext,
-                Request.Method.POST,
                 url,
                 postData,
                 { response: JSONObject ->

@@ -58,4 +58,8 @@ class FlairManagerActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration)
                 || super.onSupportNavigateUp()
     }
+
+    fun setActionBarTitle(title: String?) {
+        binding.toolbar.title = title
+    }
 }

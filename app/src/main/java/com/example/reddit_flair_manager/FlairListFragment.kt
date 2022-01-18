@@ -2,10 +2,8 @@ package com.example.reddit_flair_manager
 
 import android.os.Bundle
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +13,7 @@ import com.example.reddit_flair_manager.databinding.FragmentFlairListBinding
 import com.example.reddit_flair_manager.models.UserFlair
 import com.example.reddit_flair_manager.models.UserSubreddit
 import com.example.reddit_flair_manager.network.RedditAPIService
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_flair_list.*
 import kotlinx.android.synthetic.main.fragment_subreddit_list.*
 
@@ -37,6 +36,7 @@ class FlairListFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
 
         arguments?.let {
             subredditName = it.getString("subredditName").toString()
@@ -45,6 +45,8 @@ class FlairListFragment : Fragment() {
         requireActivity().onBackPressedDispatcher.addCallback(this) {
             Log.e("adsf", "fdaf")
         }
+
+        (activity as FlairManagerActivity).setActionBarTitle(subredditName)
 
         redditAPI = RedditAPIService(requireActivity().applicationContext)
 
@@ -57,7 +59,23 @@ class FlairListFragment : Fragment() {
     ): View? {
 
         _binding = FragmentFlairListBinding.inflate(inflater, container, false)
+        binding.indeterminateBar.visibility = View.VISIBLE
+
         return binding.root
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        menu.clear()
+        inflater.inflate(R.menu.menu_flair, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        if (id == R.id.action_save_flair) {
+            saveFlair()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     companion object {
@@ -84,6 +102,7 @@ class FlairListFragment : Fragment() {
         this.redditAPI.getSubredditFlairs(subredditName,
             { response ->
                 initAdapter(response)
+                binding.indeterminateBar.visibility = View.GONE
             },
             { error ->
                 Log.e("Flair Request", error.message.toString())
@@ -96,5 +115,20 @@ class FlairListFragment : Fragment() {
 
         rvFlairOptions.adapter = flairListAdapter
         rvFlairOptions.layoutManager = LinearLayoutManager(requireActivity())
+    }
+
+    fun saveFlair() {
+        val pos = flairListAdapter.checkedPosition
+        if (pos != -1) {
+            val flair = flairListAdapter.flairOptions[pos]
+            redditAPI.updateUserFlair(subredditName, flair, {
+                findNavController().navigate(R.id.action_FlairList_to_SubbredditList)
+                Snackbar.make(requireView(), "$subredditName flair updated successfully", Snackbar.LENGTH_LONG).show()
+            },
+            { error ->
+                Snackbar.make(requireView(), "Failed to update flair", Snackbar.LENGTH_LONG).show()
+            })
+            flairListAdapter
+        }
     }
 }

@@ -13,6 +13,7 @@
         android:theme="@style/Theme.Redditflairsettings">
         <activity
             android:name=".LoginActivity"
+            android:theme="@style/Theme.Redditflairsettings.NoTitleBar"
             android:exported="false" />
         <activity
             android:name=".FlairManagerActivity"

@@ -40,17 +40,67 @@ class RequestHandler constructor(context: Context) {
         requestQueue.add(req)
     }
 
-    fun sendAuthorizedRequest(applicationContext: Context, method: Int, url: String, postData: MutableMap<String, String>, listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener) {
+    fun sendAuthorizedGetRequest(applicationContext: Context, url: String, listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener) {
         val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs",
             AppCompatActivity.MODE_PRIVATE
         )
         val accessToken = sp.getString("accessToken", "").toString()
 
         val jsonObjectRequest = object: JsonObjectRequest(
-            method,
+            Method.GET,
             url,
             null,
             listener,
+            errorListener
+        ) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Authorization", "Bearer $accessToken")
+                return headers
+            }
+        }
+
+        addToRequestQueue(jsonObjectRequest)
+    }
+
+    @JvmName("sendAuthorizedRequest1")
+    fun sendAuthorizedGetRequest(applicationContext: Context, url: String, listener: Response.Listener<JSONArray>, errorListener: Response.ErrorListener) {
+        val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs",
+            AppCompatActivity.MODE_PRIVATE
+        )
+        val accessToken = sp.getString("accessToken", "").toString()
+
+        val jsonArrayRequest = object: JsonArrayRequest(
+            Method.GET,
+            url,
+            null,
+            listener,
+            errorListener
+        ) {
+            @Throws(AuthFailureError::class)
+            override fun getHeaders(): Map<String, String> {
+                val headers = HashMap<String, String>()
+                headers.put("Authorization", "Bearer $accessToken")
+                return headers
+            }
+        }
+
+        addToRequestQueue(jsonArrayRequest)
+    }
+
+    fun sendAuthorizedPostRequest(applicationContext: Context, url: String, postData: MutableMap<String, String>, listener: Response.Listener<JSONObject>, errorListener: Response.ErrorListener) {
+        val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs",
+            AppCompatActivity.MODE_PRIVATE
+        )
+        val accessToken = sp.getString("accessToken", "").toString()
+
+        val jsonObjectRequest = object: StringRequest(
+            Method.POST,
+            url,
+            { response ->
+                listener.onResponse(JSONObject(response))
+            },
             errorListener
         ) {
             override fun getBodyContentType(): String {
@@ -71,40 +121,6 @@ class RequestHandler constructor(context: Context) {
         }
 
         addToRequestQueue(jsonObjectRequest)
-    }
-
-    @JvmName("sendAuthorizedRequest1")
-    fun sendAuthorizedRequest(applicationContext: Context, method: Int, url: String, postData: MutableMap<String, String>, listener: Response.Listener<JSONArray>, errorListener: Response.ErrorListener) {
-        val sp: SharedPreferences = applicationContext.getSharedPreferences("redditPrefs",
-            AppCompatActivity.MODE_PRIVATE
-        )
-        val accessToken = sp.getString("accessToken", "").toString()
-
-        val jsonArrayRequest = object: JsonArrayRequest(
-            method,
-            url,
-            null,
-            listener,
-            errorListener
-        ) {
-            override fun getBodyContentType(): String {
-                return "application/x-www-form-urlencoded; charset=UTF-8"
-            }
-
-            @Throws(AuthFailureError::class)
-            override fun getParams(): Map<String, String> {
-                return postData
-            }
-
-            @Throws(AuthFailureError::class)
-            override fun getHeaders(): Map<String, String> {
-                val headers = HashMap<String, String>()
-                headers.put("Authorization", "Bearer $accessToken")
-                return headers
-            }
-        }
-
-        addToRequestQueue(jsonArrayRequest)
     }
 
     fun sendBasicAuthRequest(applicationContext: Context, method: Int, url: String, postData: MutableMap<String, String>, listener: Response.Listener<String>,errorListener: Response.ErrorListener) {
