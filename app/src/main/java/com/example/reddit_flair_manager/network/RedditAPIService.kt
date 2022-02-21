@@ -15,6 +15,8 @@ import java.net.URL
 import org.json.JSONArray
 import java.math.BigInteger
 import java.nio.charset.StandardCharsets
+import java.util.*
+import kotlin.collections.HashMap
 
 
 class RedditAPIService constructor(context: Context) {
@@ -25,11 +27,16 @@ class RedditAPIService constructor(context: Context) {
     private val appHost = applicationContext.getString(R.string.app_host)
     private val clientId = applicationContext.getString(R.string.reddit_app_id)
     private val prefFileKey = applicationContext.resources.getString(R.string.preference_file_key)
-    private lateinit var appState: String
 
     fun getOAuthSignInIntent(): Intent {
         val redirectUri = "$appScheme://$appHost"
-        appState = "RANDOM"
+        val appState = UUID.randomUUID().toString()
+
+        val sp: SharedPreferences = applicationContext.getSharedPreferences(prefFileKey, AppCompatActivity.MODE_PRIVATE)
+        val editor = sp.edit()
+        editor.putString("appState", appState)
+        editor.apply()
+
         val responseType = "code"
         val scopeStr = "identity flair mysubreddits"
         val baseUrl = "https://www.reddit.com/api/v1/authorize.compact"
@@ -43,12 +50,11 @@ class RedditAPIService constructor(context: Context) {
             // TODO: handle error
             return
         }
-//        if (uri.getQueryParameter("state") != appState) {
-//            // TODO: handle error
-//            return
-//        }
-
-        appState = ""
+        val sp: SharedPreferences = applicationContext.getSharedPreferences(prefFileKey, AppCompatActivity.MODE_PRIVATE)
+        val appState = sp.getString("appState", null)
+        if (uri.getQueryParameter("state") != appState) {
+            return
+        }
 
         val authCode = uri.getQueryParameter("code")
         val tokenUrl = applicationContext.getString(R.string.access_token_url)
