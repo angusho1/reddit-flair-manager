@@ -49,9 +49,14 @@ class SubredditListAdapter(
             if (currSubreddit.iconUrl != null) {
                 InternetImageLoader(subredditIcon).execute(currSubreddit.iconUrl.toString())
             }
+            if (!currSubreddit.flairsEnabled || !currSubreddit.flair.exists()) {
+                card_flair.visibility = View.INVISIBLE
+            } else {
+                card_flair.visibility = View.VISIBLE
+            }
         }
 
-        if (!currSubreddit.flairsEnabled) {
+        if (!currSubreddit.flairsEnabled || !currSubreddit.flair.exists()) {
             return
         }
 

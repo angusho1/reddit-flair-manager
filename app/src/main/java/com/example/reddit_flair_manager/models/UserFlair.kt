@@ -23,6 +23,10 @@ class UserFlair(
         this.type = getFlairType(type)
     }
 
+    fun exists(): Boolean {
+        return (richText != null && richText.isNotEmpty()) || (text !== "" && text !== "null")
+    }
+
     private fun getColor(colorString: String): Int {
         return if (colorString == "") {
             Color.TRANSPARENT
