@@ -48,6 +48,8 @@ class SubredditListAdapter(
 
             if (currSubreddit.iconUrl != null) {
                 InternetImageLoader(subredditIcon).execute(currSubreddit.iconUrl.toString())
+            } else {
+                subredditIcon.setImageResource(R.mipmap.ic_reddit)
             }
             if (!currSubreddit.flairsEnabled || !currSubreddit.flair.exists()) {
                 card_flair.visibility = View.INVISIBLE
