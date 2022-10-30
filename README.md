@@ -2,11 +2,8 @@
 
 A simple Android app for managing a user's flairs
 
-## Preview Example
-<span><img src="https://github.com/angusho1/reddit-flair-manager/blob/main/screenshots/rfm-example-1.png" width="300" /></span>
-<span><img src="https://github.com/angusho1/reddit-flair-manager/blob/main/screenshots/rfm-example-2.png" width="300" /></span>
-<span><img src="https://github.com/angusho1/reddit-flair-manager/blob/main/screenshots/rfm-example-3.png" width="300" /></span>
-
+## Demo
+https://user-images.githubusercontent.com/57027339/198865759-d8ee5057-da7a-4ca3-960a-a4ac473ec1ce.mp4
 
 ## Getting Started
 
