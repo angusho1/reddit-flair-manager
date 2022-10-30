@@ -1,5 +1,6 @@
 package com.example.reddit_flair_manager.adapters
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.reddit_flair_manager.R
 import com.example.reddit_flair_manager.models.*
 import com.example.reddit_flair_manager.utils.InternetImageLoader
+import com.example.reddit_flair_manager.utils.getReadableTextColor
 import kotlinx.android.synthetic.main.flair_image.view.*
 import kotlinx.android.synthetic.main.flair_text.view.*
 
@@ -58,7 +60,10 @@ class FlairAdapter(
                 val textComponent = component as TextComponent
                 viewHolder.itemView.apply {
                     flairText.text = textComponent.text
-                    flairText.setTextColor(flair.textColor)
+                    if (flair.backgroundColor != Color.TRANSPARENT) {
+                        val textColor = getReadableTextColor(flair.textColor, flair.backgroundColor)
+                        flairText.setTextColor(textColor)
+                    }
                 }
             }
             VIEW_TYPE_IMAGE -> {
